@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<title>MoonieMusic Party Quiz</title>
+<style>
+body{background:#111;color:white;font-family:Arial;text-align:center}
+.screen{display:none}
+.active{display:block}
+.item{background:#444;margin:6px;padding:10px;border-radius:10px;cursor:grab}
+.rank{min-height:200px;background:#222;padding:10px;border-radius:12px}
+button{padding:10px 20px;border-radius:10px;font-size:16px}
+</style>
+</head>
+<body>
+<h1>🎵 MoonieMusic Party Quiz 🎵</h1>
+<div id='start' class='screen active'>
+<h2>Enter 3–4 Player Names</h2>
+<input id='p1' placeholder='Player 1'><br><br>
+<input id='p2' placeholder='Player 2'><br><br>
+<input id='p3' placeholder='Player 3'><br><br>
+<input id='p4' placeholder='Player 4 (optional)'><br><br>
+<button onclick='startGame()'>Start</button>
+</div>
+<div id='game' class='screen'>
+<h2 id='turn'></h2>
+<p>Drag to rank (top = best)</p>
+<div class='rank' id='list'></div>
+<button onclick='nextPlayer()'>Next</button>
+</div>
+<div id='results' class='screen'>
+<h2>🏆 Final Scores 🏆</h2>
+<div id='scores'></div>
+<button onclick='location.reload()'>Play Again</button>
+</div>
+<script>
+// This file is ready to upload to GitHub Pages as index.html
+let players=[],scores={},current=0;
+const questions=[
+['Idol','Balalaika','Stellar Stellar','Lucky You','Backlight','We Go Up','Pop!','Drip','Ghost','Forever'],
+['Ado','IVE','Natori','Stray Kids','Aespa','Babymonster','Nayeon','Yoasobi','Creepy Nuts','Enhypen'],
+['We Go Up','Forever','Sheesh','Drip','Batter Up','Psycho','Ghost','Monsters','Hot Sauce','Stuck In The Middle']];
+let q=0;
+function shuffle(a){return a.sort(()=>Math.random()-0.5)}
+function startGame(){
+['p1','p2','p3','p4'].forEach(id=>{let v=document.getElementById(id).value;if(v){players.push(v);scores[v]=0}});
+if(players.length<3)return alert('Need at least 3 players');
+document.getElementById('start').classList.remove('active');
+document.getElementById('game').classList.add('active');
+loadTurn();
+}
+function loadTurn(){
+document.getElementById('turn').innerText=players[current]+' — Question '+(q+1);
+let list=document.getElementById('list');list.innerHTML='';
+shuffle([...questions[q]]).forEach(s=>{
+let d=document.createElement('div');d.className='item';d.innerText=s;d.draggable=true;
+d.ondragstart=e=>window.drag=d;d.ondragover=e=>e.preventDefault();d.ondrop=e=>{list.insertBefore(window.drag,d)};
+list.appendChild(d);
+});
+}
+function nextPlayer(){
+let rankValues=document.querySelectorAll('#list .item');
+rankValues.forEach((el,i)=>{scores[players[current]]+=rankValues.length-i});
+current++;
+if(current>=players.length){current=0;q++}
+if(q>=questions.length)return finish();
+loadTurn();
+}
+function finish(){
+document.getElementById('game').classList.remove('active');
+document.getElementById('results').classList.add('active');
+let out='';players.sort((a,b)=>scores[b]-scores[a]).forEach(p=>out+=p+': '+scores[p]+'<br>');
+document.getElementById('scores').innerHTML=out;
+}
+</script>
+</body>
+</html>
